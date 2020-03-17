@@ -1,0 +1,28 @@
+{
+  "name": "homework12-mysql-employee-tracker",
+  "version": "1.0.0",
+  "description": "This is an Application to track a company's employees",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hugoharley/Homework12-MySQL-Employee-Tracker.git"
+  },
+  "keywords": [
+    "mysql",
+    "node.js"
+  ],
+  "author": "Hugo Harley",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hugoharley/Homework12-MySQL-Employee-Tracker/issues"
+  },
+  "homepage": "https://github.com/hugoharley/Homework12-MySQL-Employee-Tracker#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "inquirer": "^7.1.0",
+    "mysql": "^2.18.1"
+  }
+}
