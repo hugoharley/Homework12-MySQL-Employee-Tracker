@@ -1,0 +1,15 @@
+id,title,salary,department_id
+11,Chief Executive Officer,150000,1
+12,Sales Director,85000,2
+13,Accounts Receivable ,70000,3
+14,Accounts Payable,70000,3
+15,Bookeeper,60000,3
+16,Junior Sales Associate,60000,2
+17,Senior Sales Associate,75000,2
+18,Human Resources Associate,80000,5
+19,Chief Operating Officer,130000,1
+20,Warehouse Manager,85000,6
+21,Warehouse Packer,65000,6
+22,Front End Web Developer,80000,4
+23,Database Developer,100000,4
+24,Full Stack Developer,90000,4
