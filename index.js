@@ -1,11 +1,12 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var cTable = require('console.table');
+require('dotenv').config()
 
 var connection = mysql.createConnection({
     port: 3306,
     user: "root",
-    password: process.env.CLIENT_PASS,
+    password: process.env.DB_PASS,
     database: "employee_db"
 });
 
@@ -23,7 +24,7 @@ function start() {
             choices: [
                 "Add an employee",
                 "View all employees",
-                "Update Employee",
+                "Delete Employee",
                 "EXIT"
             ]
         })
@@ -37,8 +38,8 @@ function start() {
                     viewEmployees();
                     break;
 
-                case "Update Employee":
-                    updateEmployee();
+                case "Delete Employee":
+                    deleteEmployee();
                     break;
 
                 case "EXIT":
@@ -48,7 +49,7 @@ function start() {
         });
 }
 
-function addEmployee() {
+addEmployee = async () => {
     inquirer
         .prompt([
             {
@@ -68,7 +69,7 @@ function addEmployee() {
                 name: "role"
             }
         ])
-        .then(function (answer) {
+        .then(async (answer) => {
             const roleId = await roleIdQuery(answer.role);
             connection.query(
                 "INSERT INTO employee SET ?",
@@ -88,7 +89,7 @@ function addEmployee() {
 }
 
 function viewEmployees() {
-    connection.query("SELECT * FROM employee", function (err, res) {
+    connection.query('SELECT e.id, CONCAT(e.first_name, " ", e.last_name) AS employee, roles.title, department.name AS department, salary, CONCAT(m.first_name, " ", m.last_name) AS manager FROM employee e INNER JOIN roles ON e.role_id=roles.id INNER JOIN department on roles.department_id=department.id LEFT JOIN employee m ON m.id = e.manager_id', function (err, res) {
         if (err) throw err;
         console.table(res);
         start();
@@ -96,9 +97,25 @@ function viewEmployees() {
 
 }
 
-function updateEmployee() {
-
-}
+deleteEmployee = async () => {
+    inquirer
+        .prompt({
+            type: "list",
+            message: "Please select the employee to delete: ",
+            choices: await empQuery(),
+            name: "employee"
+        }).then(async answer => {
+            console.log("Deleting selected employee...\n");
+            const employeeId = await empIdQuery(answer.employee);
+            const query = connection.query("DELETE FROM employee WHERE id=?", [employeeId], (err, res) => {
+                if (err) throw err;
+                console.log(res.affectedRows + " employee deleted!\n");
+                start();
+            });
+            console.log(query.sql);
+            console.log("-------------------------------------------------------------------------------------");
+        });
+};
 
 roleQuery = () => {
     return new Promise((resolve, reject) => {
@@ -121,7 +138,28 @@ roleIdQuery = role => {
         });
     });
 };
+empQuery = () => {
+    return new Promise((resolve, reject) => {
+        const employeeArr = [];
+        connection.query("SELECT * FROM employee", (err, res) => {
+            if (err) throw err;
+            res.forEach(employee => {
+                let fullName = employee.first_name + " " + employee.last_name;
+                employeeArr.push(fullName);
+                return err ? reject(err) : resolve(employeeArr);
+            });
+        });
+    });
+};
 
+empIdQuery = (employee) => {
+    return new Promise((resolve, reject) => {
+        connection.query("SELECT * FROM employee WHERE CONCAT(first_name, ' ', last_name)=?", [employee], async (err, res) => {
+            if (err) throw err;
+            return err ? reject(err) : resolve(res[0].id);
+        });
+    });
+};
 /*[
                    "Accounts Recievable",
                    "Accounts Payable",
