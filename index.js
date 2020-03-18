@@ -5,7 +5,7 @@ var cTable = require('console.table');
 var connection = mysql.createConnection({
     port: 3306,
     user: "root",
-    password: "Aynil42188",
+    password: process.env.CLIENT_PASS,
     database: "employee_db"
 });
 
@@ -62,31 +62,20 @@ function addEmployee() {
                 message: "What is the employee's Last Name?"
             },
             {
-                name: "role",
                 type: "list",
                 message: "What is the employee's Role/Position?",
-                choices: [
-                    "Accounts Recievable",
-                    "Accounts Payable",
-                    "Junior Sales Associate",
-                    "Senior Sales Associate",
-                    "Bookeeper",
-                    "Human Resources Associate",
-                    "Warehouse Manager",
-                    "Warehouse Packer",
-                    "Front End Developer",
-                    "Database Developer",
-                    "Full Stack Developer"
-                ]
+                choices: await roleQuery(),
+                name: "role"
             }
         ])
         .then(function (answer) {
+            const roleId = await roleIdQuery(answer.role);
             connection.query(
                 "INSERT INTO employee SET ?",
                 {
                     first_name: answer.firtname,
                     last_name: answer.lastname,
-                    role_id: answer.role
+                    role_id: roleId
                 },
                 function (err) {
                     if (err) throw (err);
@@ -111,3 +100,38 @@ function updateEmployee() {
 
 }
 
+roleQuery = () => {
+    return new Promise((resolve, reject) => {
+        const roleArr = [];
+        connection.query("SELECT * FROM roles", (err, res) => {
+            if (err) throw err;
+            res.forEach(role => {
+                roleArr.push(role.title);
+                return err ? reject(err) : resolve(roleArr);
+            });
+        });
+    });
+};
+
+roleIdQuery = role => {
+    return new Promise((resolve, reject) => {
+        connection.query("SELECT * FROM roles WHERE title=?", [role], async (err, res) => {
+            if (err) throw err;
+            return err ? reject(err) : resolve(res[0].id);
+        });
+    });
+};
+
+/*[
+                   "Accounts Recievable",
+                   "Accounts Payable",
+                   "Junior Sales Associate",
+                   "Senior Sales Associate",
+                   "Bookeeper",
+                   "Human Resources Associate",
+                   "Warehouse Manager",
+                   "Warehouse Packer",
+                   "Front End Developer",
+                   "Database Developer",
+                   "Full Stack Developer"
+               ]*/
